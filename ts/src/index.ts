@@ -13,7 +13,6 @@ Coming from a readable stream, the input must be like :
     "targetPdbFile" : "pdb into string format"
 }
 WARNING : "targetPdbFile" is an obligatory key.
-(see the ./test/entry.json for an example)
 
 * OUTPUT *
 The output is a literal with this form :
@@ -38,7 +37,6 @@ The output is a literal with this form :
 
 // TODO
 // - doc
-// - git
 // - npm
 
 
