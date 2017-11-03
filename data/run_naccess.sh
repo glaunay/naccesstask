@@ -25,5 +25,5 @@ rsaFile=$fileName".rsa"
 
 
 # parse & get results
-echo `echo "{\"accessibilities\":[" ;grep "^RES" $rsaFile | awk 'BEGIN{FS="";OFS=""}{print "[\"" $5$6$7 "\",\"" $9 "\"," $10$11$12$13 ", {\"All-atoms\":{\"abs\":" $15$16$17$18$19$20$21$22 ",\"rel\":" $24$25$26$27$28 "}}],"}' | head --bytes -2; echo "]}"`
+echo `echo "{\"accessibilities\":[" ;grep "^RES" $rsaFile | awk 'BEGIN{FS="";OFS=""}{print "[\"" $5$6$7 "\",\"" $9 "\"," $10$11$12$13 ", {\"All_atoms\":{\"abs\":" $15$16$17$18$19$20$21$22 ",\"rel\":" $24$25$26$27$28 "}}],"}' | head --bytes -2; echo "]}"`
 
