@@ -6,6 +6,7 @@
   "description": "TaskObject derived to make a Naccess Task",
   "dependencies": {
     "my-local-ip": "^1.0.0",
-    "nslurm": "^0.8.0"
+    "nslurm": "^0.8.0",
+    "pdb-lib": "^2.0.5"
   }
 }

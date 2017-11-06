@@ -11,6 +11,7 @@ import localIP = require ('my-local-ip');
 import jsonfile = require ('jsonfile');
 import fs = require ('fs');
 import stream = require ('stream');
+import pdbLib = require ('pdb-lib');
 
 
 var tcp = localIP(),
@@ -20,22 +21,6 @@ var engineType: string = null,
 	bean: any = null,
 	entryFile: string = null;
 var optCacheDir: string[] = [];
-
-
-var fileToStream = function (entryFile: string): stream.Readable {
-	try {
-		var content: string = fs.readFileSync(entryFile, 'utf8');
-		content = content.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
-		var s = new stream.Readable();
-		s.push('{ "targetPdbFile" : "');
-		s.push(content);
-		s.push('"}');
-		s.push(null);
-		return s;
-	} catch (err) {
-		throw 'ERROR while opening the file ' + entryFile + ' :' + err;
-	}
-}
 
 
 ///////////// arguments /////////////
@@ -96,20 +81,22 @@ jobManager.on('ready', function () {
 
 //////////// tests /////////////
 var naccessTest = function () {
-    var jobProfile = null; // "arwen_express" or "arwen_cpu" for example
-    var syncMode = false;
+    var jobProfile: string = null; // "arwen_express" or "arwen_cpu" for example
+    var syncMode: boolean = false;
     var n = new nacT.Naccess(jobManager, jobProfile, syncMode);
     //n.testMode(true);
 
-    fileToStream(entryFile).pipe(n);
-    //process.stdin.pipe(n);
-    n.on('processed', function (s) {
-        console.log('**** data T');
-    })
-    .on('err', function (s) {
-        console.log('**** ERROR T');
-    })
-    //.pipe(process.stdout);
+    pdbLib.parse({ 'file' : entryFile}).on('end', function (pdbObj) {
+        pdbObj.stream(true, "targetPdbFile").pipe(n);
+        //process.stdin.pipe(n);
+        n.on('processed', function (s) {
+            console.log('**** data T');
+        })
+        .on('err', function (s) {
+            console.log('**** ERROR T');
+        })
+        //.pipe(process.stdout);
+    });
 }
 
 

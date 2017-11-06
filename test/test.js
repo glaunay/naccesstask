@@ -9,26 +9,10 @@ const nacT = require("../index");
 const jobManager = require("nslurm"); // engineLayer branch
 const localIP = require("my-local-ip");
 const jsonfile = require("jsonfile");
-const fs = require("fs");
-const stream = require("stream");
+const pdbLib = require("pdb-lib");
 var tcp = localIP(), port = "2240";
 var engineType = null, cacheDir = null, bean = null, entryFile = null;
 var optCacheDir = [];
-var fileToStream = function (entryFile) {
-    try {
-        var content = fs.readFileSync(entryFile, 'utf8');
-        content = content.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
-        var s = new stream.Readable();
-        s.push('{ "targetPdbFile" : "');
-        s.push(content);
-        s.push('"}');
-        s.push(null);
-        return s;
-    }
-    catch (err) {
-        throw 'ERROR while opening the file ' + entryFile + ' :' + err;
-    }
-};
 ///////////// arguments /////////////
 process.argv.forEach(function (val, index, array) {
     if (val === '-cache') {
@@ -88,13 +72,15 @@ var naccessTest = function () {
     var syncMode = false;
     var n = new nacT.Naccess(jobManager, jobProfile, syncMode);
     //n.testMode(true);
-    fileToStream(entryFile).pipe(n);
-    //process.stdin.pipe(n);
-    n.on('processed', function (s) {
-        console.log('**** data T');
-    })
-        .on('err', function (s) {
-        console.log('**** ERROR T');
+    pdbLib.parse({ 'file': entryFile }).on('end', function (pdbObj) {
+        pdbObj.stream(true, "targetPdbFile").pipe(n);
+        //process.stdin.pipe(n);
+        n.on('processed', function (s) {
+            console.log('**** data T');
+        })
+            .on('err', function (s) {
+            console.log('**** ERROR T');
+        });
+        //.pipe(process.stdout);
     });
-    //.pipe(process.stdout);
 };

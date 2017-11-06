@@ -63,7 +63,7 @@ export class Naccess extends tk.Task {
     *     - modules needed
     *     - variables to export in the batch script
     */
-    prepareJob (inputs: {}[]): any {
+    prepareJob (inputs: any[]): any {
         var modules: string[] = ['naccess'];
         var exportVar: {} = {};
         return super.configJob(inputs, modules, exportVar);
