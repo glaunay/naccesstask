@@ -51,14 +51,10 @@ class Naccess extends tk.Task {
         this.staticTag = 'naccess';
     }
     /*
-    * Here are defined all the parameters specific to the task :
-    *     - modules needed
-    *     - variables to export in the batch script
+    * Here manage the input(s)
     */
     prepareJob(inputs) {
-        var modules = ['naccess'];
-        var exportVar = {};
-        return super.configJob(inputs, modules, exportVar);
+        return super.configJob(inputs);
     }
     /*
     * To manage the output(s)

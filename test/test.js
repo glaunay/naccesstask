@@ -3,7 +3,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 /*
 TO RUN :
-node path/to/this/script/test.js -cache /path/to/cache/tmp/ -conf /path/to/nslurm/config/arwenConf.json -pdb /path/to/your/PDB/file.pdb
+node path/to/this/script/test.js -cache /path/to/cache/tmp/
+                                -conf /path/to/nslurm/config/arwenConf.json
+                                -pdb /path/to/your/PDB/file.pdb
 */
 const nacT = require("../index");
 const jobManager = require("nslurm"); // engineLayer branch
@@ -70,7 +72,10 @@ jobManager.on('ready', function () {
 var naccessTest = function () {
     var jobProfile = null; // "arwen_express" or "arwen_cpu" for example
     var syncMode = false;
-    var n = new nacT.Naccess(jobManager, jobProfile, syncMode);
+    var options = {
+        'modules': ['naccess']
+    };
+    var n = new nacT.Naccess(jobManager, jobProfile, syncMode, options);
     //n.testMode(true);
     pdbLib.parse({ 'file': entryFile }).on('end', function (pdbObj) {
         pdbObj.stream(true, "targetPdbFile").pipe(n);
