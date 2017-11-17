@@ -44,8 +44,6 @@ import tk = require('taskObject');
 
 declare var __dirname;
 
-var b_test = false; // test mode
-
 export class Naccess extends tk.Task {
 	/*
 	* Initialize the task parameters.

@@ -80,10 +80,10 @@ var naccessTest = function () {
     pdbLib.parse({ 'file': entryFile }).on('end', function (pdbObj) {
         pdbObj.stream(true, "targetPdbFile").pipe(n);
         //process.stdin.pipe(n);
-        n.on('processed', function (s) {
+        n.on('processed', function (results) {
             console.log('**** data T');
         })
-            .on('err', function (s) {
+            .on('err', function (err, jobID) {
             console.log('**** ERROR T');
         });
         //.pipe(process.stdout);
