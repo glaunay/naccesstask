@@ -42,8 +42,8 @@ class Naccess extends tk.Task {
     /*
     * Initialize the task parameters.
     */
-    constructor(jobManager, jobProfile, syncMode, options) {
-        super(jobManager, jobProfile, syncMode, options);
+    constructor(management, syncMode, options) {
+        super(management, syncMode, options);
         this.rootdir = __dirname;
         this.settFile = this.rootdir + '/data/settings.json';
         super.init(this.settFile);

@@ -85,10 +85,14 @@ jobManager.on('ready', function () {
 var naccessTest = function () {
     var jobProfile: string = null; // "arwen_express" or "arwen_cpu" for example
     var syncMode: boolean = false;
+    let management: {} = {
+        'jobManager' : jobManager,
+        'jobProfile' : jobProfile
+    }
     var options: {} = {
         'modules' : ['naccess']
     }
-    var n = new nacT.Naccess(jobManager, jobProfile, syncMode, options);
+    var n = new nacT.Naccess(management, syncMode, options);
     //n.testMode(true);
 
     pdbLib.parse({ 'file' : entryFile}).on('end', function (pdbObj) {
