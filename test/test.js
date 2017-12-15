@@ -8,80 +8,41 @@ node path/to/this/script/test.js -cache /path/to/cache/tmp/
                                 -pdb /path/to/your/PDB/file.pdb
 */
 const nacT = require("../index");
-const jobManager = require("nslurm"); // engineLayer branch
 const localIP = require("my-local-ip");
 const jsonfile = require("jsonfile");
 const pdbLib = require("pdb-lib");
 var tcp = localIP(), port = "2240";
-var engineType = null, cacheDir = null, bean = null, entryFile = null;
+var engineType = null, cacheDir = null, bean = null, inputFile = null, b_index = false, b_emul = false, slurmOptions = null;
 var optCacheDir = [];
-///////////// arguments /////////////
-process.argv.forEach(function (val, index, array) {
-    if (val === '-cache') {
-        if (!array[index + 1])
-            throw 'usage : ';
-        cacheDir = array[index + 1];
-    }
-    if (val === '-conf') {
-        if (!array[index + 1])
-            throw 'usage : ';
-        try {
-            bean = jsonfile.readFileSync(array[index + 1]);
-        }
-        catch (err) {
-            console.log('ERROR while reading the config file :');
-            console.log(err);
-        }
-    }
-    if (val === '-pdb') {
-        if (!array[index + 1])
-            throw 'usage : ';
-        entryFile = array[index + 1];
-    }
-});
-if (!cacheDir)
-    throw 'No cacheDir specified !';
-// example CACHEDIR = /home/mgarnier/tmp
-if (!bean)
-    throw 'No config file specified !';
-// example BEAN = /home/mgarnier/taskObject_devTests/node_modules/nslurm/config/arwenConf.json
-if (!entryFile)
-    throw 'No PDB file specified !';
-// example ENTRYFILE = ./test/2hyd.pdb
-engineType = engineType ? engineType : bean.engineType;
-bean.cacheDir = cacheDir ? cacheDir : bean.cacheDir;
-// console.log("Config file content:\n");
-// console.dir(bean);
-optCacheDir.push(bean.cacheDir);
-///////////// jobManager /////////////
-//jobManager.debugOn();
-jobManager.index(optCacheDir);
-jobManager.configure({ "engine": engineType, "binaries": bean.binaries });
-jobManager.start({
-    'cacheDir': bean.cacheDir,
-    'tcp': tcp,
-    'port': port
-});
-jobManager.on('exhausted', function () {
-    console.log("All jobs processed");
-});
-jobManager.on('ready', function () {
-    naccessTest();
-});
-//////////// tests /////////////
-var naccessTest = function () {
-    var jobProfile = null; // "arwen_express" or "arwen_cpu" for example
+//////////////// usage //////////////////
+var usage = function () {
+    let str = '\n\n********** Test file to run a naccessTask **********\n\n';
+    str += 'DATE : 2017.12.15\n\n';
+    str += 'USAGE : (in the naccessTask directory)\n';
+    str += 'node test/test.js\n';
+    str += '    -u, to have help\n';
+    str += '    -cache [PATH_TO_CACHE_DIRECTORY_FOR_NSLURM], [optional if -conf]\n';
+    str += '    -conf [PATH_TO_THE_CLUSTER_CONFIG_FILE_FOR_NSLURM], [not necessary if --emul]\n';
+    str += '    -pdb [PATH_TO_YOUR_PDB_FILE]\n';
+    str += '    --index, to allow indexation of the cache directory of nslurm [optional]\n';
+    str += '    --emul, to run the test without any job manager [optional]\n\n';
+    str += 'EXAMPLE :\n';
+    str += 'node test/test.js\n';
+    str += '    -cache /home/mgarnier/tmp/\n';
+    str += '    -conf /home/mgarnier/taskObject_devTests/node_modules/nslurm/config/arwenConf.json\n';
+    str += '    -pdb ./test/2hyd.pdb\n\n';
+    str += '**************************************************\n\n';
+    console.log(str);
+};
+//////////// functions /////////////
+var naccessTest = function (management) {
     var syncMode = false;
-    let management = {
-        'jobManager': jobManager,
-        'jobProfile': jobProfile
-    };
-    var options = {
+    var NaccessOptions = {
         'modules': ['naccess']
     };
-    var n = new nacT.Naccess(management, syncMode, options);
+    var n = new nacT.Naccess(management, syncMode, NaccessOptions);
     //n.testMode(true);
-    pdbLib.parse({ 'file': entryFile }).on('end', function (pdbObj) {
+    pdbLib.parse({ 'file': inputFile }).on('end', function (pdbObj) {
         pdbObj.stream(true, "targetPdbFile").pipe(n);
         //process.stdin.pipe(n);
         n.on('processed', function (results) {
@@ -93,3 +54,90 @@ var naccessTest = function () {
         //.pipe(process.stdout);
     });
 };
+///////////// arguments /////////////
+process.argv.forEach(function (val, index, array) {
+    if (val == '-u') {
+        console.log(usage());
+        process.exit();
+    }
+    if (val === '-cache') {
+        if (!array[index + 1])
+            throw 'usage : ' + usage();
+        cacheDir = array[index + 1];
+    }
+    if (val === '-conf') {
+        if (!array[index + 1])
+            throw 'usage : ' + usage();
+        try {
+            bean = jsonfile.readFileSync(array[index + 1]);
+        }
+        catch (err) {
+            console.log('ERROR while reading the config file :');
+            console.log(err);
+        }
+    }
+    if (val === '-pdb') {
+        if (!array[index + 1])
+            throw 'usage : ' + usage();
+        inputFile = array[index + 1];
+    }
+    if (val === '--index') {
+        b_index = true;
+    }
+    if (val === '--emul') {
+        b_emul = true;
+    }
+});
+if (!cacheDir)
+    throw 'No cacheDir specified ! Usage : ' + usage();
+if (!inputFile)
+    throw 'No PDB file specified ! Usage : ' + usage();
+bean.cacheDir = cacheDir ? cacheDir : bean.cacheDir;
+// console.log("Config file content:\n");
+// console.dir(bean);
+optCacheDir.push(bean.cacheDir);
+///////////// management /////////////
+slurmOptions = {
+    'cacheDir': null,
+    'tcp': tcp,
+    'port': port
+};
+if (!b_emul) {
+    ///////////// jobManager /////////////
+    if (!bean)
+        throw 'No config file specified ! Usage : ' + usage();
+    if (!bean.hasOwnProperty('cacheDir') && !cacheDir)
+        throw 'No cacheDir specified ! Usage : ' + usage();
+    bean.cacheDir = cacheDir ? cacheDir : bean.cacheDir;
+    slurmOptions['cacheDir'] = bean.cacheDir;
+    optCacheDir.push(bean.cacheDir);
+    let jobManager = require('nslurm'); // engineLayer branch
+    let jobProfile = null; // "arwen_express" or "arwen_cpu" for example
+    let management = {
+        'jobManager': jobManager,
+        'jobProfile': jobProfile
+    };
+    //jobManager.debugOn();
+    if (b_index)
+        jobManager.index(optCacheDir);
+    else
+        jobManager.index(null);
+    jobManager.configure({ "engine": engineType, "binaries": bean.binaries });
+    jobManager.start(slurmOptions);
+    jobManager.on('exhausted', function () {
+        console.log("All jobs processed");
+    });
+    jobManager.on('ready', function () {
+        naccessTest(management);
+    });
+}
+else {
+    ///////////// emulation /////////////
+    if (!cacheDir)
+        throw 'No cacheDir specified ! Usage : ' + usage();
+    slurmOptions['cacheDir'] = cacheDir;
+    let management = {
+        'emulate': slurmOptions
+    };
+    naccessTest(management);
+}
