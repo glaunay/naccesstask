@@ -37,7 +37,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // TODO
 // - doc
 // - npm
-const tk = require("taskObject");
+const tk = require("taskobject");
 class Naccess extends tk.Task {
     /*
     * Initialize the task parameters.
