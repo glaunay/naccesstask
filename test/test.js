@@ -93,20 +93,18 @@ if (!bean)
     throw 'No config file specified ! Usage : ' + usage();
 if (!bean.hasOwnProperty('cacheDir') && !cacheDir)
     throw 'No cacheDir specified ! Usage : ' + usage();
+engineType = engineType ? engineType : bean.engineType;
 bean.cacheDir = cacheDir ? cacheDir : bean.cacheDir;
 // console.log("Config file content:\n");
 // console.dir(bean);
 optCacheDir.push(bean.cacheDir);
 ///////////// management /////////////
 slurmOptions = {
-    'cacheDir': null,
+    'cacheDir': bean.cacheDir,
     'tcp': tcp,
     'port': port
 };
 ///////////// jobManager /////////////
-bean.cacheDir = cacheDir ? cacheDir : bean.cacheDir;
-slurmOptions['cacheDir'] = bean.cacheDir;
-optCacheDir.push(bean.cacheDir);
 let jobProfile = null; // "arwen_express" or "arwen_cpu" for example
 let management = {
     'jobManager': jobManager,
