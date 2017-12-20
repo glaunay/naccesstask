@@ -9,15 +9,16 @@ node path/to/this/script/test.js -cache /path/to/cache/tmp/
 */
 const nacT = require("../index");
 const localIP = require("my-local-ip");
+const jobManager = require("nslurm"); // engineLayer branch
 const jsonfile = require("jsonfile");
 const pdbLib = require("pdb-lib");
 var tcp = localIP(), port = "2240";
-var engineType = null, cacheDir = null, bean = null, inputFile = null, b_index = false, b_emul = false, slurmOptions = null;
+var engineType = null, cacheDir = null, bean = null, inputFile = null, b_index = false, slurmOptions = null;
 var optCacheDir = [];
 //////////////// usage //////////////////
 var usage = function () {
     let str = '\n\n********** Test file to run a naccessTask **********\n\n';
-    str += 'DATE : 2017.12.15\n\n';
+    str += 'DATE : 2017.12.19\n\n';
     str += 'USAGE : (in the naccessTask directory)\n';
     str += 'node test/test.js\n';
     str += '    -u, to have help\n';
@@ -25,7 +26,6 @@ var usage = function () {
     str += '    -conf [PATH_TO_THE_CLUSTER_CONFIG_FILE_FOR_NSLURM], [not necessary if --emul]\n';
     str += '    -pdb [PATH_TO_YOUR_PDB_FILE]\n';
     str += '    --index, to allow indexation of the cache directory of nslurm [optional]\n';
-    str += '    --emul, to run the test without any job manager [optional]\n\n';
     str += 'EXAMPLE :\n';
     str += 'node test/test.js\n';
     str += '    -cache /home/mgarnier/tmp/\n';
@@ -84,14 +84,15 @@ process.argv.forEach(function (val, index, array) {
     if (val === '--index') {
         b_index = true;
     }
-    if (val === '--emul') {
-        b_emul = true;
-    }
 });
 if (!cacheDir)
     throw 'No cacheDir specified ! Usage : ' + usage();
 if (!inputFile)
     throw 'No PDB file specified ! Usage : ' + usage();
+if (!bean)
+    throw 'No config file specified ! Usage : ' + usage();
+if (!bean.hasOwnProperty('cacheDir') && !cacheDir)
+    throw 'No cacheDir specified ! Usage : ' + usage();
 bean.cacheDir = cacheDir ? cacheDir : bean.cacheDir;
 // console.log("Config file content:\n");
 // console.dir(bean);
@@ -102,42 +103,25 @@ slurmOptions = {
     'tcp': tcp,
     'port': port
 };
-if (!b_emul) {
-    ///////////// jobManager /////////////
-    if (!bean)
-        throw 'No config file specified ! Usage : ' + usage();
-    if (!bean.hasOwnProperty('cacheDir') && !cacheDir)
-        throw 'No cacheDir specified ! Usage : ' + usage();
-    bean.cacheDir = cacheDir ? cacheDir : bean.cacheDir;
-    slurmOptions['cacheDir'] = bean.cacheDir;
-    optCacheDir.push(bean.cacheDir);
-    let jobManager = require('nslurm'); // engineLayer branch
-    let jobProfile = null; // "arwen_express" or "arwen_cpu" for example
-    let management = {
-        'jobManager': jobManager,
-        'jobProfile': jobProfile
-    };
-    //jobManager.debugOn();
-    if (b_index)
-        jobManager.index(optCacheDir);
-    else
-        jobManager.index(null);
-    jobManager.configure({ "engine": engineType, "binaries": bean.binaries });
-    jobManager.start(slurmOptions);
-    jobManager.on('exhausted', function () {
-        console.log("All jobs processed");
-    });
-    jobManager.on('ready', function () {
-        naccessTest(management);
-    });
-}
-else {
-    ///////////// emulation /////////////
-    if (!cacheDir)
-        throw 'No cacheDir specified ! Usage : ' + usage();
-    slurmOptions['cacheDir'] = cacheDir;
-    let management = {
-        'emulate': slurmOptions
-    };
+///////////// jobManager /////////////
+bean.cacheDir = cacheDir ? cacheDir : bean.cacheDir;
+slurmOptions['cacheDir'] = bean.cacheDir;
+optCacheDir.push(bean.cacheDir);
+let jobProfile = null; // "arwen_express" or "arwen_cpu" for example
+let management = {
+    'jobManager': jobManager,
+    'jobProfile': jobProfile
+};
+//jobManager.debugOn();
+if (b_index)
+    jobManager.index(optCacheDir);
+else
+    jobManager.index(null);
+jobManager.configure({ "engine": engineType, "binaries": bean.binaries });
+jobManager.start(slurmOptions);
+jobManager.on('exhausted', function () {
+    console.log("All jobs processed");
+});
+jobManager.on('ready', function () {
     naccessTest(management);
-}
+});
