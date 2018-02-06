@@ -12,7 +12,7 @@ npm install naccesstask
 ```
 
 
-## Usage
+## Tests
 
 You can either make a test in your proper JS file or use the test file we provide.
 
@@ -67,23 +67,14 @@ node ./node_modules/naccesstask/test.js
 This script needs some command line options. You can use option `-u` to display the documentation.
 
 
-
-
-
-### Loading library
-
-In your JavaScript module :
-
-```
-var nac = require('naccesstask');
-```
-
+## Usage
 
 ### Creating an instance of naccesstask - not updated !!!!
 
 In your JavaScript module :
 
 ```
+var nac = require('naccesstask');
 var n = new nac.Naccess (management);
 ```
 Note that you need a job manager to use naccesstask, like **nslurm** ([GitHub repo][2], [NPM package][3]) adapted to SLURM manager.
