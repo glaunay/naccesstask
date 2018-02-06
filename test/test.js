@@ -7,52 +7,28 @@ node path/to/this/script/test.js -cache /path/to/cache/tmp/
                                 -conf /path/to/nslurm/config/arwenConf.json
                                 -pdb /path/to/your/PDB/file.pdb
 */
-const nacT = require("../index");
-const localIP = require("my-local-ip");
-const jobManager = require("nslurm"); // engineLayer branch
 const jsonfile = require("jsonfile");
-const pdbLib = require("pdb-lib");
-var tcp = localIP(), port = "2240";
-var engineType = null, cacheDir = null, bean = null, inputFile = null, b_index = false, slurmOptions = null;
+const func = require("./index");
+var cacheDir = null, bean = null, inputFile = null, b_index = false;
 var optCacheDir = [];
 //////////////// usage //////////////////
 var usage = function () {
     let str = '\n\n********** Test file to run a naccessTask **********\n\n';
-    str += 'DATE : 2017.12.19\n\n';
+    str += 'DATE : 2018.02.06\n\n';
     str += 'USAGE : (in the naccessTask directory)\n';
-    str += 'node test/test.js\n';
+    str += 'node ./test/test.js\n';
     str += '    -u, to have help\n';
     str += '    -cache [PATH_TO_CACHE_DIRECTORY_FOR_NSLURM], [optional if -conf]\n';
     str += '    -conf [PATH_TO_THE_CLUSTER_CONFIG_FILE_FOR_NSLURM], [not necessary if --emul]\n';
     str += '    -pdb [PATH_TO_YOUR_PDB_FILE]\n';
     str += '    --index, to allow indexation of the cache directory of nslurm [optional]\n';
     str += 'EXAMPLE :\n';
-    str += 'node test/test.js\n';
+    str += 'node ./test/test.js\n';
     str += '    -cache /home/mgarnier/tmp/\n';
-    str += '    -conf /home/mgarnier/taskObject_devTests/node_modules/nslurm/config/arwenConf.json\n';
+    str += '    -conf ./node_modules/nslurm/config/arwenConf.json\n';
     str += '    -pdb ./test/2hyd.pdb\n\n';
     str += '**************************************************\n\n';
     console.log(str);
-};
-//////////// functions /////////////
-var naccessTest = function (management) {
-    var syncMode = false;
-    var NaccessOptions = {
-        'modules': ['naccess']
-    };
-    var n = new nacT.Naccess(management, syncMode, NaccessOptions);
-    //n.testMode(true);
-    pdbLib.parse({ 'file': inputFile }).on('end', function (pdbObj) {
-        pdbObj.stream(true, "targetPdbFile").pipe(n);
-        //process.stdin.pipe(n);
-        n.on('processed', function (results) {
-            console.log('**** data T');
-        })
-            .on('err', function (err, jobID) {
-            console.log('**** ERROR T');
-        });
-        //.pipe(process.stdout);
-    });
 };
 ///////////// arguments /////////////
 process.argv.forEach(function (val, index, array) {
@@ -85,41 +61,32 @@ process.argv.forEach(function (val, index, array) {
         b_index = true;
     }
 });
-if (!cacheDir)
-    throw 'No cacheDir specified ! Usage : ' + usage();
 if (!inputFile)
     throw 'No PDB file specified ! Usage : ' + usage();
 if (!bean)
     throw 'No config file specified ! Usage : ' + usage();
 if (!bean.hasOwnProperty('cacheDir') && !cacheDir)
     throw 'No cacheDir specified ! Usage : ' + usage();
-engineType = engineType ? engineType : bean.engineType;
-bean.cacheDir = cacheDir ? cacheDir : bean.cacheDir;
-// console.log("Config file content:\n");
-// console.dir(bean);
-optCacheDir.push(bean.cacheDir);
 ///////////// management /////////////
-slurmOptions = {
-    'cacheDir': bean.cacheDir,
-    'tcp': tcp,
-    'port': port
-};
-///////////// jobManager /////////////
-let jobProfile = null; // "arwen_express" or "arwen_cpu" for example
-let management = {
-    'jobManager': jobManager,
-    'jobProfile': jobProfile
-};
-//jobManager.debugOn();
+bean.cacheDir = cacheDir ? cacheDir : bean.cacheDir; // priority for line command argument
 if (b_index)
-    jobManager.index(optCacheDir);
+    optCacheDir.push(bean.cacheDir);
 else
-    jobManager.index(null);
-jobManager.configure({ "engine": engineType, "binaries": bean.binaries });
-jobManager.start(slurmOptions);
-jobManager.on('exhausted', function () {
+    optCacheDir = null;
+let opt = {
+    'bean': bean,
+    'optCacheDir': optCacheDir
+};
+///////////// run /////////////
+func.JMsetup(opt)
+    .on('ready', function (myJM) {
+    let jobProfile = null; // "arwen_express" or "arwen_cpu" for example
+    let management = {
+        'jobManager': myJM,
+        'jobProfile': jobProfile
+    };
+    func.naccessTest(inputFile, management);
+})
+    .on('exhausted', () => {
     console.log("All jobs processed");
-});
-jobManager.on('ready', function () {
-    naccessTest(management);
 });
