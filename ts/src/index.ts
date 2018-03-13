@@ -44,15 +44,21 @@ import tk = require('taskobject');
 declare var __dirname;
 
 export class Naccess extends tk.Task {
+    public targetPdbFile; // a slot
+
 	/*
 	* Initialize the task parameters.
 	*/
-	constructor (management: {}, syncMode: boolean, options?: any) {
-		super(management, syncMode, options);
+	constructor (management: {}, options?: any) {
+		super(management, options);
         this.rootdir = __dirname;
         this.settFile = this.rootdir + '/data/settings.json';
-        super.init(this.settFile);
         this.staticTag = 'naccess';
+
+        /* Creation of the slot symbols : only one here */
+        this.slotSymbols = ['targetPdbFile'];
+
+        super.init(this.settFile);
 	}
 
     /*

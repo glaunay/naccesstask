@@ -41,12 +41,14 @@ class Naccess extends tk.Task {
     /*
     * Initialize the task parameters.
     */
-    constructor(management, syncMode, options) {
-        super(management, syncMode, options);
+    constructor(management, options) {
+        super(management, options);
         this.rootdir = __dirname;
         this.settFile = this.rootdir + '/data/settings.json';
-        super.init(this.settFile);
         this.staticTag = 'naccess';
+        /* Creation of the slot symbols : only one here */
+        this.slotSymbols = ['targetPdbFile'];
+        super.init(this.settFile);
     }
     /*
     * Here manage the input(s)

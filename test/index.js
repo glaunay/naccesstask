@@ -15,14 +15,12 @@ const pdbLib = require("pdb-lib");
 * @management [literal] composed of 2 manadatory keys : 'jobManager' and 'jobProfile'
 */
 exports.naccessTest = function (inputFile, management) {
-    var syncMode = false;
     var NaccessOptions = {
         'modules': ['naccess']
     };
-    var n = new nacT.Naccess(management, syncMode, NaccessOptions);
-    //n.testMode(true);
+    var n = new nacT.Naccess(management, NaccessOptions);
     pdbLib.parse({ 'file': inputFile }).on('end', function (pdbObj) {
-        pdbObj.stream(true, "targetPdbFile").pipe(n);
+        pdbObj.stream(true, "targetPdbFile").pipe(n.targetPdbFile);
         //process.stdin.pipe(n);
         n.on('processed', function (results) {
             console.log('**** data T');

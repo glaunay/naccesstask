@@ -1,12 +1,11 @@
 "use strict";
-/// <reference path="../../typings/index.d.ts" />
-Object.defineProperty(exports, "__esModule", { value: true });
 /*
 TO RUN :
 node path/to/this/script/test.js -cache /path/to/cache/tmp/
                                 -conf /path/to/nslurm/config/arwenConf.json
                                 -pdb /path/to/your/PDB/file.pdb
 */
+Object.defineProperty(exports, "__esModule", { value: true });
 const jsonfile = require("jsonfile");
 const func = require("./index");
 var cacheDir = null, bean = null, inputFile = null, b_index = false;
