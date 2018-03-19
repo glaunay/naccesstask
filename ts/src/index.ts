@@ -53,7 +53,7 @@ export class Naccess extends tk.Task {
 		super(management, options);
         this.rootdir = __dirname;
         this.settFile = this.rootdir + '/data/settings.json';
-        this.staticTag = 'naccess';
+        this.staticTag = 'naccesstask';
 
         /* Creation of the slot symbols : only one here */
         this.slotSymbols = ['targetPdbFile'];
