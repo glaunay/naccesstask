@@ -1,5 +1,0 @@
-{
-	"coreScript" : "./data/run_naccess.sh",
-	"automaticClosure": false,
-	"settings": {}
-}
