@@ -37,7 +37,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // TODO
 // - doc
 const tk = require("taskobject");
-class Naccess extends tk.Task {
+class naccesstask extends tk.Task {
     /*
     * Initialize the task parameters.
     */
@@ -67,4 +67,4 @@ class Naccess extends tk.Task {
         return results;
     }
 }
-exports.Naccess = Naccess;
+exports.naccesstask = naccesstask;

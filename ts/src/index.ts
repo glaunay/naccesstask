@@ -43,7 +43,7 @@ import tk = require('taskobject');
 
 declare var __dirname;
 
-export class Naccess extends tk.Task {
+export class naccesstask extends tk.Task {
     public targetPdbFile; // a slot
 
 	/*

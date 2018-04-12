@@ -2,7 +2,7 @@
   "name": "naccesstask",
   "version": "1.1.0",
   "author": "Mélanie Garnier",
-  "date": "last modification : 2017-12-18",
+  "date": "last modification : 2018-04-12",
   "description": "TaskObject derived to make a Naccess Task",
   "dependencies": {
     "commander": "^2.15.0",
@@ -10,7 +10,7 @@
     "my-local-ip": "^1.0.0",
     "nslurm": "^1.1.1",
     "pdb-lib": "^2.0.6",
-    "taskobject": "^1.1.0"
+    "taskobject": "^1.2.0"
   },
   "main": "index.js",
   "directories": {

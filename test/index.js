@@ -18,7 +18,7 @@ exports.naccessTest = function (inputFile, management) {
     var NaccessOptions = {
         'modules': ['naccess']
     };
-    var n = new nacT.Naccess(management, NaccessOptions);
+    var n = new nacT.naccesstask(management, NaccessOptions);
     pdbLib.parse({ 'file': inputFile }).on('end', function (pdbObj) {
         pdbObj.stream(true, "targetPdbFile").pipe(n.targetPdbFile);
         //process.stdin.pipe(n);
