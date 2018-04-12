@@ -53,7 +53,6 @@ export class naccesstask extends tk.Task {
 		super(management, options);
         this.rootdir = __dirname;
         this.coreScript = this.rootdir + '/data/run_naccess.sh';
-        this.staticTag = 'naccesstask';
 
         /* Creation of the slot symbols : only one here */
         this.slotSymbols = ['targetPdbFile'];
